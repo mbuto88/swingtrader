@@ -1,0 +1,113 @@
+import pandas as pd
+from model import scaleDataBuildModel, scaleDataBuildModelV2
+import pandas as pd
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM, Dropout
+from keras.regularizers import l2
+from stockfinderv2 import findstocks, fetchStocksByMarket, fetchStocksByMarketAndReduceSizeOfList, fetchStocksByMarketv2
+import numpy as np
+import datetime
+from historicaldata import gethistoricaldata
+from modelv2 import modelV2
+from stockcsvobj import StockCSVObj
+from stockprediction import StockPrediction
+import tensorflow as tf
+from data_management import clean_csv_list, write_stock_predictions_to_csv
+import csv
+import keyboard
+import time
+from datetime import datetime
+import threading
+
+def write_to_csv(predictions):
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    filename = f'N:\\stockdata\\snapshot_results_{timestamp}.csv'
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(predictions.toString)
+    print(f'Snapshot saved to {filename}')
+
+def listen_for_keypress(array):
+    print("Press 'p' to take a snapshot of the array and save to CSV")
+    while True:
+        if keyboard.is_pressed('p'):
+            write_to_csv(array)
+            time.sleep(1) # Prevents multiple snapshots if 'p' is held down
+
+def sortByDayDelta(stock_predictions):
+    stock_predictions.sort(key=lambda x: x.day_delta, reverse=True)
+    return stock_predictions
+
+def sortByPercentageDelta(stock_predictions):
+    stock_predictions.sort(key=lambda x: x.percentage_delta, reverse=True)
+    return stock_predictions
+
+def sortByDollarDelta(stock_predictions):
+    stock_predictions.sort(key=lambda x: x.dollar_delta, reverse=True)
+    return stock_predictions
+
+def main():
+    # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+    # Get list of stock names
+    # nyse, nasdaq = findstocks()
+    #symbols = nyse + nasdaq
+
+    #symbols = fetchStocksByMarket("nasdaq")
+    symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 25)
+    # get price data for stocks (5 years historical data)
+    historicaldata = gethistoricaldata(symbols)
+    print("Completed retrieving historical price data\n")
+
+    clean_historical_data = clean_csv_list(historicaldata)
+    print("Completed cleaning list of historical price data csvs and deleted empty csv files \n")
+
+    for stock in clean_historical_data:
+        if stock.symbol == "test":
+            continue
+        print(stock.symbol, stock.filename)
+
+    stock_price_predictions = []
+
+    # listens for keypress 'p' by running on a separate thread,
+    # really slows down how fast it runs for prediction calculations
+    # threading.Thread(target=listen_for_keypress, args=(stock_price_predictions,)).start()
+
+    for stock in historicaldata:
+        if stock.symbol == "test":
+            continue
+        print(f"now predicting price for {stock.symbol}, from {stock.filename}\n")
+
+        # train model on price and store price in array
+        stock_price_predictions.append(scaleDataBuildModelV2(stock.symbol, stock.filename))
+        print(f"Completed prediction for {stock.symbol}")
+        #stock_price_predictions.append(modelV2(stock.symbol, stock.filename))
+
+    # Select most profitable stocks for the day, TODO: decide if choosing overall gain by price or percentage
+    sortedPredictionsFromHighToLowByDayDelta = sortByDayDelta(stock_price_predictions)
+    sortedPredictionsFromHighToLowByPercetageDelta = sortByPercentageDelta(stock_price_predictions)
+    sortedPredictionsFromHighToLowByDollarDelta = sortByDollarDelta(stock_price_predictions)
+
+    # Print best picks, by total increase
+    print(f"Predictions sorted by total dollar increase from open to close")
+    for prediction in sortedPredictionsFromHighToLowByDayDelta:
+        print(prediction.symbol, prediction.day_delta)
+
+    # Print best picks, by total increase
+    print(f"Predictions sorted by total dollar increase from open to high")
+    for prediction in sortedPredictionsFromHighToLowByDollarDelta:
+        print(prediction.symbol, prediction.dollar_delta)
+
+    # Print best picks, by total increase
+    print(f"Predictions sorted by total percent increase from open to close")
+    for prediction in sortedPredictionsFromHighToLowByPercetageDelta:
+        print(prediction.symbol, prediction.percentage_delta)
+
+    write_stock_predictions_to_csv(sortedPredictionsFromHighToLowByPercetageDelta)
+
+    # TODO: buy picks from brokerage API with trailing stop
+
+
+if __name__ == "__main__":
+    main()
