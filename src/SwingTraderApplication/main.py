@@ -58,10 +58,11 @@ def main():
     symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 25)
     # get price data for stocks (5 years historical data)
     historicaldata = gethistoricaldata(symbols)
-    print("Completed retrieving historical price data\n")
+    # print("\033[92mGreen text!\033[0m")
+    print("\033[92mCompleted retrieving historical price data\n\033[0m")
 
     clean_historical_data = clean_csv_list(historicaldata)
-    print("Completed cleaning list of historical price data csvs and deleted empty csv files \n")
+    print("\033[92mCompleted cleaning list of historical price data csvs and deleted empty csv files \n\033[0m")
 
     for stock in clean_historical_data:
         if stock.symbol == "test":
@@ -81,7 +82,7 @@ def main():
 
         # train model on price and store price in array
         stock_price_predictions.append(scaleDataBuildModelV2(stock.symbol, stock.filename))
-        print(f"Completed prediction for {stock.symbol}")
+        print(f"\033[92mCompleted prediction for {stock.symbol}")
         #stock_price_predictions.append(modelV2(stock.symbol, stock.filename))
 
     # Select most profitable stocks for the day, TODO: decide if choosing overall gain by price or percentage
@@ -90,17 +91,17 @@ def main():
     sortedPredictionsFromHighToLowByDollarDelta = sortByDollarDelta(stock_price_predictions)
 
     # Print best picks, by total increase
-    print(f"Predictions sorted by total dollar increase from open to close")
+    print(f"\033[92mPredictions sorted by total dollar increase from open to close\033[0m")
     for prediction in sortedPredictionsFromHighToLowByDayDelta:
         print(prediction.symbol, prediction.day_delta)
 
     # Print best picks, by total increase
-    print(f"Predictions sorted by total dollar increase from open to high")
+    print(f"\033[92mPredictions sorted by total dollar increase from open to high\033[0m")
     for prediction in sortedPredictionsFromHighToLowByDollarDelta:
         print(prediction.symbol, prediction.dollar_delta)
 
     # Print best picks, by total increase
-    print(f"Predictions sorted by total percent increase from open to close")
+    print(f"\033[92mPredictions sorted by total percent increase from open to close\033[0m")
     for prediction in sortedPredictionsFromHighToLowByPercetageDelta:
         print(prediction.symbol, prediction.percentage_delta)
 
