@@ -21,18 +21,6 @@ import time
 from datetime import datetime
 import threading
 
-class Logger:
-    def __init__(self, file_name):
-        self.log_file = open(file_name, 'w')
-        self.terminal = sys.stdout
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log_file.write(message)
-
-    def flush(self):
-        self.log_file.flush()
-
 def write_to_csv(predictions):
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     filename = f'N:\\stockdata\\snapshot_results_{timestamp}.csv'
@@ -65,7 +53,6 @@ def getDateTime():
     return current_date_time.strftime("%Y-%m-%d %H:%M:%S")
 
 def main():
-    sys.stdout = Logger('output_log.txt')
 
     print("This will be printed to the console and written to the file")
     # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
@@ -86,7 +73,8 @@ def main():
     for stock in clean_historical_data:
         if stock.symbol == "test":
             continue
-        print(stock.symbol, stock.filename)
+        else:
+            print(stock.symbol, stock.filename)
 
     stock_price_predictions = []
 
