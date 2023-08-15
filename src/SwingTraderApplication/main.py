@@ -85,7 +85,6 @@ def main():
         # train model on price and store price in array
         stock_price_predictions.append(scaleDataBuildModelV2(stock.symbol, stock.filename))
         print(f"\033[92m{getDateTime()}Completed prediction for {stock.symbol}")
-        #stock_price_predictions.append(modelV2(stock.symbol, stock.filename))
 
     # Select most profitable stocks for the day, TODO: decide if choosing overall gain by price or percentage
     sortedPredictionsFromHighToLowByDayDelta = sortByDayDelta(stock_price_predictions)

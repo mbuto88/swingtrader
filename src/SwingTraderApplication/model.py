@@ -11,31 +11,23 @@ from stockprediction import StockPrediction
 def scaleDataBuildModelV2(symbol, filename):
     try:
         df = pd.read_csv(filename)
+        df['Date'] = pd.to_datetime(df['Date'])
+
         if len(df) < 2 or df.iloc[1].isnull().all():
             print("The second row is empty or the dataframe doesn't have enough rows.")
             return StockPrediction(symbol, 1, 0, 0,0,0,0)
 
-        # Convert 'Date' into separate features
-        df['Date'] = pd.to_datetime(df['Date'])
-        df['Year'] = df['Date'].dt.year
-        df['Month'] = df['Date'].dt.month
-        df['Day'] = df['Date'].dt.day
-
         # Create separate scalers for input and output features
         input_scaler = MinMaxScaler(feature_range=(0, 1))
-        output_scaler = MinMaxScaler(feature_range=(0, 1))
 
-        # Fit the scalers
-        scaled_input_features = ["Year", "Month", "Day", "Open", "High", "Low", "Close", "Adj Close", "Volume"]
-        scaled_output_features = ["Open", "High", "Low", "Close"]
-        scaled_input = input_scaler.fit_transform(df[scaled_input_features])
-        scaled_output = output_scaler.fit_transform(df[scaled_output_features])
+        # Fit and transform the input scaler
+        scaled_input = input_scaler.fit_transform(df[["Open", "High", "Low", "Close", "Adj Close", "Volume"]])
 
         # Reshape data for LSTM [samples, timesteps, features]
         X, y, times = [], [], []
         for i in range(60, len(scaled_input)):
             X.append(scaled_input[i - 60:i])
-            y.append(scaled_output[i])  # Predicting 'open', 'high', 'low', 'close'
+            y.append(df[["Open", "High", "Low", "Close"]].iloc[i])
             times.append(df['Date'].iloc[i])
         X, y = np.array(X), np.array(y)
 
@@ -46,9 +38,14 @@ def scaleDataBuildModelV2(symbol, filename):
             y_train, y_test = y[train_index], y[test_index]
             time_test = [times[i] for i in test_index]
 
+            # Create output scaler and fit on y_train only
+            output_scaler = MinMaxScaler(feature_range=(0, 1))
+            y_train_scaled = output_scaler.fit_transform(y_train)
+            y_test_scaled = output_scaler.transform(y_test)
+
             # Build and train the model
-            model = build_model((X_train.shape[1], X_train.shape[2]), y_train.shape[1], 50, 0.2, 0.01)
-            model.fit(X_train, y_train, epochs=50, batch_size=32)
+            model = build_model((X_train.shape[1], X_train.shape[2]), y_train_scaled.shape[1], 50, 0.2, 0.01)
+            model.fit(X_train, y_train_scaled, epochs=50, batch_size=32)
 
             # Predict the next day's stock prices
             last_60_days = scaled_input[-60:]
