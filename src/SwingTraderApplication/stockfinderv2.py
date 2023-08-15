@@ -39,7 +39,7 @@ def get_factors(stock_symbol):
     except:
         return None, None, None
 
-def select_best_stocks(stock_symbols, top_n=150, weights=(0.5, 0.3, 0.2)):
+def select_best_stocks(stock_symbols, top_n=150, weights=(0.00001, 0.3, 0.2)):
     stock_factors = {}
     print(f"Starting to select top:{top_n} best stocks from list given")
 
