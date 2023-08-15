@@ -7,6 +7,8 @@ from datetime import datetime
 def clean_csv_list(stockCsvObjects):
     clean_list = []
     for stock in stockCsvObjects:
+        if stock == "test":
+            continue
         with open(stock.filename, 'r') as file:
             reader = csv.reader(file)
             lines = list(reader)

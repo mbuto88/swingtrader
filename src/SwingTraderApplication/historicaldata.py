@@ -12,7 +12,6 @@ def gethistoricaldata(stocks):
     # Define the data range
     end_date = datetime.today().strftime('%Y-%m-%d')
     start_date = (datetime.today() - timedelta(days=5*365)).strftime('%Y-%m-%d')
-    i = 0;
 
     # Download the data
     for stock in stocks:
@@ -24,16 +23,12 @@ def gethistoricaldata(stocks):
             data.to_csv(csvname)
 
             addHeaders(csvname)
+            unix_csv_name = f"N:\stockdata\\{stock}_5_years-unix-timestamp.csv"
             listofhistoricaldatacsvs.append(StockCSVObj(stock, unix_csv_name))
         else:
             unix_csv_name = ConvertToUnixTimestamp(csvname, stock)
 
             listofhistoricaldatacsvs.append(StockCSVObj(stock, unix_csv_name))
-            # TODO: Remove i
-            # i+= 1
-
-            #if(i >= 2):
-                # break
 
             print(f"Stock data for {stock} exists")
 

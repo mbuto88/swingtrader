@@ -1,5 +1,5 @@
 import pandas as pd
-from model import scaleDataBuildModel, scaleDataBuildModelV2
+from model import scaleDataBuildModelV2
 import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
@@ -10,7 +10,6 @@ from stockfinderv2 import findstocks, fetchStocksByMarket, fetchStocksByMarketAn
 import numpy as np
 import datetime
 from historicaldata import gethistoricaldata
-from modelv2 import modelV2
 from stockcsvobj import StockCSVObj
 from stockprediction import StockPrediction
 import tensorflow as tf
@@ -54,17 +53,13 @@ def getDateTime():
 
 def main():
 
-    print("This will be printed to the console and written to the file")
-    # print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
-    # Get list of stock names
-    # nyse, nasdaq = findstocks()
-    #symbols = nyse + nasdaq
+    # Get list of stock names and make preliminary picks
+    symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 2)
 
-    #symbols = fetchStocksByMarket("nasdaq")
-    symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 40)
     # get price data for stocks (5 years historical data)
     historicaldata = gethistoricaldata(symbols)
-    # print("\033[92mGreen text!\033[0m")
+
+    # print("\033[92m Sets text to green \033[0m")
     print(f"\033[92m{getDateTime()}Completed retrieving historical price data \n\033[0m")
 
     clean_historical_data = clean_csv_list(historicaldata)
