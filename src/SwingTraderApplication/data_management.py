@@ -20,12 +20,12 @@ def clean_csv_list(stockCsvObjects):
 
     return clean_list
 
-def write_stock_predictions_to_csv(predictions):
+def write_stock_predictions_to_csv(predictions, model_type):
     # Get today's date
     today = datetime.today().strftime('%m-%d-%Y')
-
+    now = datetime.now()
     # Define the CSV filename
-    filename = f'N:\stockdata\FinalPredictions\sorted-picks-{today}.csv'
+    filename = f'N:\stockdata\FinalPredictions\{model_type}-sorted-picks-{today}-{now.strftime("%H-%M")}.csv'
 
     # Define the column headers for the CSV
     headers = ['symbol', 'date', 'day_delta', 'high', 'open_price', 'close_price', 'adjusted_close', 'percentage_delta', 'dollar_delta']

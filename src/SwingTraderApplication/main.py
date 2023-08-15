@@ -1,5 +1,5 @@
 import pandas as pd
-from model import scaleDataBuildModelV2
+from model import scaleDataBuildModelV2, AdvancedScaleDataBuildModelV2
 import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
@@ -72,6 +72,7 @@ def main():
             print(stock.symbol, stock.filename)
 
     stock_price_predictions = []
+    advanced_stock_price_predictions = []
 
     # listens for keypress 'p' by running on a separate thread,
     # really slows down how fast it runs for prediction calculations
@@ -84,6 +85,15 @@ def main():
 
         # train model on price and store price in array
         stock_price_predictions.append(scaleDataBuildModelV2(stock.symbol, stock.filename))
+        print(f"\033[92m{getDateTime()}Completed prediction for {stock.symbol}")
+
+    for stock in historicaldata:
+        if stock.symbol == "test":
+            continue
+        print(f"{getDateTime()}now predicting price for {stock.symbol}, from {stock.filename}\n")
+
+        # train model on price and store price in array
+        advanced_stock_price_predictions.append(AdvancedScaleDataBuildModelV2(stock.symbol, stock.filename))
         print(f"\033[92m{getDateTime()}Completed prediction for {stock.symbol}")
 
     # Select most profitable stocks for the day, TODO: decide if choosing overall gain by price or percentage
@@ -106,7 +116,8 @@ def main():
     for prediction in sortedPredictionsFromHighToLowByPercetageDelta:
         print(prediction.symbol, prediction.percentage_delta)
 
-    write_stock_predictions_to_csv(sortedPredictionsFromHighToLowByPercetageDelta)
+    write_stock_predictions_to_csv(sortedPredictionsFromHighToLowByPercetageDelta, "scaleDataBuildModelV2")
+    write_stock_predictions_to_csv(sortedPredictionsFromHighToLowByPercetageDelta, "advanced_stock_price_predictions")
 
     # TODO: buy picks from brokerage API with trailing stop
 
