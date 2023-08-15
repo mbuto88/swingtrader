@@ -22,8 +22,7 @@ def gethistoricaldata(stocks):
 
             data.to_csv(csvname)
 
-            addHeaders(csvname)
-            unix_csv_name = f"N:\stockdata\\{stock}_5_years-unix-timestamp.csv"
+            unix_csv_name = ConvertToUnixTimestamp(csvname, stock)
             listofhistoricaldatacsvs.append(StockCSVObj(stock, unix_csv_name))
         else:
             unix_csv_name = ConvertToUnixTimestamp(csvname, stock)

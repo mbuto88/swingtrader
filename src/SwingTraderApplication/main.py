@@ -54,7 +54,7 @@ def getDateTime():
 def main():
 
     # Get list of stock names and make preliminary picks
-    symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 2)
+    symbols = fetchStocksByMarketAndReduceSizeOfList("nasdaq", 50)
 
     # get price data for stocks (5 years historical data)
     historicaldata = gethistoricaldata(symbols)
